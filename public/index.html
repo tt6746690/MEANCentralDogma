@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+<html>
+<script src = "http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+<body>
+<h1>MEAN CENTRAL DOGMA</h1>
+<div ng-app = 'bodyApp' ng-controller = 'bodyCtrl'>
+
+<form action='' method = 'POST'>
+	Input Sequence:<br><br>
+	<textarea placeholder='enter whatever you want!' name='input' rows='10' cols='60' ng-model='sequence'></textarea><br><br>
+    
+    <select size = 3 name = 'choice' id = 'choices'>
+        <option value='DNAtoProtein'>DNA to Protein</option>
+        <option value='ProteintoDNA'>Protein to DNA</option>
+    </select>
+
+	<button type='button' ng-click="submits()">Convert</button>
+    <button type='button' ng-click="gethistory()">Get Stored Reords</button>
+</form><br>
+
+
+<div>Protein Sequence Outputs:</div><br>
+<textarea placeholder='outputs!' name='outputs' rows='10' cols='60' ng-bind='output'></textarea><br>
+
+History
+<div ng-repeat="item in history">
+    <p>{{$index+1}} DNA: {{item.dna}}<p>
+    <p>             Protein: {{item.protein}}<p>
+</div>
+
+</div>
+<br>
+
+
+<!--AngularJS controllers -->
+<script>
+var dropdown = document.getElementById('choices');
+var app = angular.module('bodyApp', []);
+app.controller('bodyCtrl', function($scope, $http){
+	$scope.sequence = '';
+    $scope.output = [];
+	$scope.submits = function(){
+        if(dropdown.options[dropdown.selectedIndex].value == 'DNAtoProtein'){
+            $http.post('http://localhost:9002/DNAtoProtein', {"sequence": $scope.sequence}).success(function(res){
+                    $scope.output = res.transformed;
+            })
+        }else if(dropdown.options[dropdown.selectedIndex].value == 'ProteintoDNA'){
+            $http.get('http://localhost:9002/ProteintoDNA').success(function(res){
+                    $scope.output = res;
+                    $scope.$apply('output');
+            })
+        }
+
+    }
+
+    $scope.history =  {}; 
+    $scope.gethistory = function(){
+
+        $http.get('http://localhost:9002/history').success(function(res){
+            $scope.history = res;
+        })
+    }
+
+})
+
+</script>
+
+</body>
+</html>
+
